@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Number Generator (0-255)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .number-display {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .formats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .format-box {
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+        }
+
+        .format-box h3 {
+            color: #495057;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .format-box span {
+            font-weight: bold;
+            color: #333;
+            font-family: monospace;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .color-preview {
+            width: 100%;
+            height: 60px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px solid #ddd;
+            transition: background-color 0.3s ease;
+        }
+
+        .info {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .number-display {
+                font-size: 3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Random Number Generator</h1>
+        <p class="info">Generate random numbers between 0 and 255</p>
+        
+        <div class="number-display" id="numberDisplay">0</div>
+        
+        <button class="generate-btn" onclick="generateRandomNumber()">Generate Random Number</button>
+        
+        <div class="formats">
+            <div class="format-box">
+                <h3>Decimal</h3>
+                <span id="decimal">0</span>
+            </div>
+            <div class="format-box">
+                <h3>Hexadecimal</h3>
+                <span id="hexadecimal">0x00</span>
+            </div>
+            <div class="format-box">
+                <h3>Binary</h3>
+                <span id="binary">00000000</span>
+            </div>
+        </div>
+        
+        <div class="color-preview" id="colorPreview"></div>
+        
+        <div class="info">
+            <p>Numbers range from 0 to 255 (one byte/8-bit values)</p>
+            <p>Perfect for RGB color values, ASCII codes, and byte operations</p>
+        </div>
+    </div>
+
+    <script>
+        function generateRandomNumber() {
+            // Generate random number between 0 and 255
+            const randomNum = Math.floor(Math.random() * 256);
+            
+            // Update the main display
+            const numberDisplay = document.getElementById('numberDisplay');
+            numberDisplay.textContent = randomNum;
+            
+            // Add animation effect
+            numberDisplay.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                numberDisplay.style.transform = 'scale(1)';
+            }, 200);
+            
+            // Update format displays
+            updateFormats(randomNum);
+            
+            // Update color preview (using the number as a grayscale value)
+            updateColorPreview(randomNum);
+        }
+        
+        function updateFormats(num) {
+            // Update decimal
+            document.getElementById('decimal').textContent = num;
+            
+            // Update hexadecimal
+            document.getElementById('hexadecimal').textContent = '0x' + num.toString(16).toUpperCase().padStart(2, '0');
+            
+            // Update binary
+            document.getElementById('binary').textContent = num.toString(2).padStart(8, '0');
+        }
+        
+        function updateColorPreview(num) {
+            const colorPreview = document.getElementById('colorPreview');
+            // Use the number as a grayscale value
+            colorPreview.style.backgroundColor = `rgb(${num}, ${num}, ${num})`;
+            colorPreview.title = `RGB(${num}, ${num}, ${num})`;
+        }
+        
+        // Generate initial random number when page loads
+        window.addEventListener('load', function() {
+            generateRandomNumber();
+        });
+        
+        // Add keyboard support (press Space or Enter to generate)
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space' || event.code === 'Enter') {
+                event.preventDefault();
+                generateRandomNumber();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Numbers 0-255 Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .number-display {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(45deg, #4CAF50, #2196F3);
+            color: white;
+            border-radius: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            margin: 20px 0;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .formats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .format-box {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .format-box h3 {
+            margin: 0 0 10px 0;
+            color: #555;
+        }
+
+        .format-value {
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .color-preview {
+            width: 100%;
+            height: 80px;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+            margin: 20px 0;
+        }
+
+        .history {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .history-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .history-number {
+            background: #e0e0e0;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: #fff3e0;
+            border: 1px solid #ffcc02;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Random Number Generator (0-255)</h1>
+        <p>Generate random numbers in the range 0 to 255 (8-bit values)</p>
+
+        <div class="number-display" id="numberDisplay">0</div>
+
+        <div class="controls">
+            <button onclick="generateRandom()">Generate Random</button>
+            <button onclick="generateSequential()">Show All Numbers</button>
+            <button onclick="clearHistory()">Clear History</button>
+            <button onclick="generateMultiple()">Generate 10 Numbers</button>
+        </div>
+
+        <div class="formats">
+            <div class="format-box">
+                <h3>Decimal</h3>
+                <div class="format-value" id="decimal">0</div>
+            </div>
+            <div class="format-box">
+                <h3>Hexadecimal</h3>
+                <div class="format-value" id="hex">0x00</div>
+            </div>
+            <div class="format-box">
+                <h3>Binary</h3>
+                <div class="format-value" id="binary">00000000</div>
+            </div>
+            <div class="format-box">
+                <h3>Octal</h3>
+                <div class="format-value" id="octal">000</div>
+            </div>
+        </div>
+
+        <div class="color-preview" id="colorPreview" title="Grayscale representation"></div>
+
+        <div class="stats" id="stats">
+            <div class="stat-box">
+                <strong>Count:</strong> <span id="count">0</span>
+            </div>
+            <div class="stat-box">
+                <strong>Average:</strong> <span id="average">0</span>
+            </div>
+            <div class="stat-box">
+                <strong>Min:</strong> <span id="min">0</span>
+            </div>
+            <div class="stat-box">
+                <strong>Max:</strong> <span id="max">0</span>
+            </div>
+        </div>
+
+        <div class="history">
+            <h3>Generated Numbers History:</h3>
+            <div class="history-numbers" id="historyNumbers"></div>
+        </div>
+
+        <div class="info">
+            <h3>About 0-255 Range:</h3>
+            <ul>
+                <li><strong>8-bit values:</strong> Range of values that can be stored in one byte</li>
+                <li><strong>RGB colors:</strong> Each color channel (Red, Green, Blue) uses values 0-255</li>
+                <li><strong>ASCII codes:</strong> Extended ASCII characters use codes 0-255</li>
+                <li><strong>Binary representation:</strong> 8 bits can represent 2^8 = 256 different values (0-255)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentNumber = 0;
+        let numberHistory = [];
+        let isShowingSequential = false;
+        let sequentialIndex = 0;
+
+        // Generate a single random number between 0 and 255
+        function generateRandom() {
+            currentNumber = Math.floor(Math.random() * 256);
+            updateDisplay();
+            addToHistory(currentNumber);
+            animateNumber();
+        }
+
+        // Show all numbers from 0 to 255 sequentially
+        function generateSequential() {
+            if (!isShowingSequential) {
+                isShowingSequential = true;
+                sequentialIndex = 0;
+                showSequentialNumber();
+            }
+        }
+
+        function showSequentialNumber() {
+            if (sequentialIndex <= 255) {
+                currentNumber = sequentialIndex;
+                updateDisplay();
+                addToHistory(currentNumber);
+                sequentialIndex++;
+                setTimeout(showSequentialNumber, 100); // Show each number for 100ms
+            } else {
+                isShowingSequential = false;
+                sequentialIndex = 0;
+            }
+        }
+
+        // Generate multiple random numbers quickly
+        function generateMultiple() {
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    generateRandom();
+                }, i * 200);
+            }
+        }
+
+        // Update all display elements
+        function updateDisplay() {
+            document.getElementById('numberDisplay').textContent = currentNumber;
+            document.getElementById('decimal').textContent = currentNumber;
+            document.getElementById('hex').textContent = '0x' + currentNumber.toString(16).toUpperCase().padStart(2, '0');
+            document.getElementById('binary').textContent = currentNumber.toString(2).padStart(8, '0');
+            document.getElementById('octal').textContent = '0' + currentNumber.toString(8).padStart(3, '0');
+            
+            updateColorPreview();
+            updateStats();
+        }
+
+        // Update color preview
+        function updateColorPreview() {
+            const colorPreview = document.getElementById('colorPreview');
+            colorPreview.style.backgroundColor = `rgb(${currentNumber}, ${currentNumber}, ${currentNumber})`;
+            colorPreview.title = `RGB(${currentNumber}, ${currentNumber}, ${currentNumber}) - Grayscale value`;
+        }
+
+        // Add number to history
+        function addToHistory(num) {
+            numberHistory.unshift(num);
+            if (numberHistory.length > 50) { // Keep only last 50 numbers
+                numberHistory.pop();
+            }
+            updateHistoryDisplay();
+        }
+
+        // Update history display
+        function updateHistoryDisplay() {
+            const historyDiv = document.getElementById('historyNumbers');
+            historyDiv.innerHTML = numberHistory
+                .slice(0, 20) // Show only last 20 for display
+                .map(num => `<span class="history-number">${num}</span>`)
+                .join('');
+        }
+
+        // Update statistics
+        function updateStats() {
+            if (numberHistory.length === 0) return;
+
+            const count = numberHistory.length;
+            const sum = numberHistory.reduce((a, b) => a + b, 0);
+            const average = (sum / count).toFixed(1);
+            const min = Math.min(...numberHistory);
+            const max = Math.max(...numberHistory);
+
+            document.getElementById('count').textContent = count;
+            document.getElementById('average').textContent = average;
+            document.getElementById('min').textContent = min;
+            document.getElementById('max').textContent = max;
+        }
+
+        // Clear history
+        function clearHistory() {
+            numberHistory = [];
+            updateHistoryDisplay();
+            updateStats();
+        }
+
+        // Animate the main number display
+        function animateNumber() {
+            const display = document.getElementById('numberDisplay');
+            display.style.transform = 'scale(1.1)';
+            display.style.transition = 'transform 0.2s ease';
+            setTimeout(() => {
+                display.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', function(event) {
+            switch(event.code) {
+                case 'Space':
+                    event.preventDefault();
+                    generateRandom();
+                    break;
+                case 'Enter':
+                    event.preventDefault();
+                    generateRandom();
+                    break;
+                case 'KeyS':
+                    event.preventDefault();
+                    generateSequential();
+                    break;
+                case 'KeyC':
+                    event.preventDefault();
+                    clearHistory();
+                    break;
+            }
+        });
+
+        // Initialize with a random number
+        window.addEventListener('load', function() {
+            generateRandom();
+            
+            // Add keyboard shortcuts info
+            console.log('Keyboard shortcuts:');
+            console.log('Space/Enter: Generate random number');
+            console.log('S: Show all numbers 0-255');
+            console.log('C: Clear history');
+        });
+
+        // Additional utility functions for console use
+        window.getAllNumbers = function() {
+            return Array.from({length: 256}, (_, i) => i);
+        };
+
+        window.getRandomInRange = function(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        };
+
+        window.convertNumber = function(num) {
+            return {
+                decimal: num,
+                hex: '0x' + num.toString(16).toUpperCase().padStart(2, '0'),
+                binary: num.toString(2).padStart(8, '0'),
+                octal: '0' + num.toString(8).padStart(3, '0')
+            };
+        };
+    </script>
+</body>
+</html>
